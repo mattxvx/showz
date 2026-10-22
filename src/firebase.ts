@@ -10,7 +10,6 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
-import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import type { ShowEvent } from './types';
 
 export const firebaseConfig = {
@@ -24,45 +23,22 @@ export const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 
 const SHOWS_COLLECTION = 'shows';
 
 /**
- * Uploads a base64 or dataURL image to Firebase Storage,
- * returning the public download URL. Falls back to original string if upload fails.
- */
-export async function uploadFlyerImage(showId: string, dataUrl: string): Promise<string> {
-  if (!dataUrl.startsWith('data:image')) {
-    return dataUrl; // Already a regular URL
-  }
-  try {
-    const storageRef = ref(storage, `flyers/${showId}_${Date.now()}.jpg`);
-    await uploadString(storageRef, dataUrl, 'data_url');
-    const downloadUrl = await getDownloadURL(storageRef);
-    return downloadUrl;
-  } catch (err) {
-    console.warn('Firebase Storage upload notice (using compressed data fallback):', err);
-    return dataUrl;
-  }
-}
-
-/**
- * Save or update a show in Cloud Firestore
+ * Save or update a show in Cloud Firestore.
+ * Flyer image is stored directly inside the Firestore document payload
+ * (compressed to ~50KB), bypassing Firebase Storage completely.
+ * This ensures the app is 100% FREE with ZERO billing / Blaze account required.
  */
 export async function syncShowToCloud(show: ShowEvent): Promise<void> {
   try {
-    let flyerUrl = show.flyerUrl;
-    if (flyerUrl && flyerUrl.startsWith('data:image')) {
-      flyerUrl = await uploadFlyerImage(show.id, flyerUrl);
-    }
-
     const showRef = doc(db, SHOWS_COLLECTION, show.id);
     await setDoc(
       showRef,
       {
         ...show,
-        flyerUrl,
         cloudUpdatedAt: serverTimestamp(),
       },
       { merge: true }

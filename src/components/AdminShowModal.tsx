@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ShowEvent, EventGenre, EventStatus, AgeRestriction } from '../types';
 import { FLYER_PRESETS } from '../data/sampleShows';
+import { compressImageFile } from '../utils/imageCompressor';
 import { X, Upload, Flame, Check } from 'lucide-react';
 
 interface AdminShowModalProps {
@@ -62,6 +63,7 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
   const [isFree, setIsFree] = useState(false);
   const [customFlyerUrl, setCustomFlyerUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   useEffect(() => {
     if (editingShow) {
@@ -99,15 +101,19 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        const result = uploadEvent.target?.result as string;
-        setFormData((prev) => ({ ...prev, flyerUrl: result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsCompressing(true);
+        // Automatically optimize & compress to ~50KB for free Firestore storage
+        const compressedDataUrl = await compressImageFile(file, 1000, 0.75);
+        setFormData((prev) => ({ ...prev, flyerUrl: compressedDataUrl }));
+      } catch (err: any) {
+        alert('Could not process image: ' + err.message);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -543,10 +549,11 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
                 </label>
                 <label className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-black border border-dashed border-neutral-700 hover:border-red-500 text-neutral-300 text-xs font-bold cursor-pointer transition-colors uppercase">
                   <Upload className="w-4 h-4 text-red-500" />
-                  <span>CHOOSE FLYER FILE...</span>
+                  <span>{isCompressing ? 'OPTIMIZING IMAGE...' : 'CHOOSE FLYER FILE...'}</span>
                   <input
                     type="file"
                     accept="image/*"
+                    disabled={isCompressing}
                     onChange={handleFileUpload}
                     className="hidden"
                   />
