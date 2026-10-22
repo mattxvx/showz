@@ -3,7 +3,6 @@ import { getInitialSampleShows } from '../data/sampleShows';
 
 const STORAGE_KEY = 'gigpulse_shows_v1';
 const FAVORITES_KEY = 'gigpulse_favorites_v1';
-const ADMIN_PIN_KEY = 'gigpulse_admin_pin_v1';
 
 export function loadShowsFromStorage(): ShowEvent[] {
   try {
@@ -81,12 +80,4 @@ export function resetShowsToDefaults(): ShowEvent[] {
   const initial = getInitialSampleShows();
   saveShowsToStorage(initial);
   return initial;
-}
-
-export function getStoredAdminPIN(): string {
-  return localStorage.getItem(ADMIN_PIN_KEY) || '1234';
-}
-
-export function setStoredAdminPIN(pin: string): void {
-  localStorage.setItem(ADMIN_PIN_KEY, pin);
 }

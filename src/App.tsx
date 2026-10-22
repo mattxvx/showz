@@ -14,6 +14,7 @@ import {
   deleteShowFromCloud,
   subscribeToCloudShows,
 } from './firebase';
+import { isSessionValid, clearAdminSession } from './utils/auth';
 import { Navbar } from './components/Navbar';
 import { FilterBar } from './components/FilterBar';
 import { ShowCard } from './components/ShowCard';
@@ -34,9 +35,7 @@ export function App() {
   // State
   const [shows, setShows] = useState<ShowEvent[]>(() => loadShowsFromStorage());
   const [favorites, setFavorites] = useState<string[]>(() => loadFavorites());
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    return sessionStorage.getItem('gigpulse_is_admin') === 'true';
-  });
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => isSessionValid());
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
 
   // Modals & Active Selections
@@ -106,7 +105,7 @@ export function App() {
   const handleToggleAdmin = () => {
     if (isAdmin) {
       setIsAdmin(false);
-      sessionStorage.removeItem('gigpulse_is_admin');
+      clearAdminSession();
     } else {
       setIsAuthOpen(true);
     }
@@ -114,7 +113,6 @@ export function App() {
 
   const handleAuthSuccess = () => {
     setIsAdmin(true);
-    sessionStorage.setItem('gigpulse_is_admin', 'true');
   };
 
   // Favorites
@@ -576,19 +574,9 @@ export function App() {
           <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider">
             <button
               onClick={handleToggleAdmin}
-              className="text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
+              className="text-neutral-500 hover:text-red-400 transition-colors cursor-pointer"
             >
-              {isAdmin ? 'EXIT ADMIN' : 'ADMIN LOGIN (DEMO: 1234)'}
-            </button>
-            <button
-              onClick={() => {
-                if (confirm('Reset to sample hardcore bands (Sunami, Hatebreed, Drain, etc.)?')) {
-                  handleResetDefaults();
-                }
-              }}
-              className="text-neutral-600 hover:text-neutral-400 transition-colors"
-            >
-              RESET SAMPLE GIGS
+              {isAdmin ? 'EXIT ADMIN CONSOLE' : 'ADMIN ACCESS'}
             </button>
           </div>
         </div>
