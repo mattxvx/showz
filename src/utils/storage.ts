@@ -1,4 +1,4 @@
-import { ShowEvent } from '../types';
+import type { ShowEvent } from '../types';
 import { getInitialSampleShows } from '../data/sampleShows';
 
 const STORAGE_KEY = 'gigpulse_shows_v1';

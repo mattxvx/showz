@@ -1,8 +1,8 @@
 import React from 'react';
-import { ShowEvent } from '../types';
+import type { ShowEvent } from '../types';
 import { formatEventDate, formatTime, getGenreColor, getStatusBadge } from '../utils/formatters';
 import { downloadICSFile, shareShow } from '../utils/calendar';
-import { MapPin, Calendar, Clock, Ticket, Heart, Share2, Edit2, Copy, Trash2, Sparkles } from 'lucide-react';
+import { MapPin, Clock, Heart, Share2, Edit2, Copy, Trash2, Sparkles, Calendar } from 'lucide-react';
 
 interface ShowCardProps {
   show: ShowEvent;

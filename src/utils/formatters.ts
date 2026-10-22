@@ -1,4 +1,4 @@
-import { EventGenre, EventStatus } from '../types';
+import type { EventGenre, EventStatus } from '../types';
 
 export function formatEventDate(dateStr: string): { label: string; isTonight: boolean; isTomorrow: boolean } {
   const [year, month, day] = dateStr.split('-').map(Number);

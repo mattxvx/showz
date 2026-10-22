@@ -1,4 +1,4 @@
-import { ShowEvent } from '../types';
+import type { ShowEvent } from '../types';
 
 function formatICSDate(dateStr: string, timeStr: string): string {
   // dateStr is YYYY-MM-DD, timeStr is HH:mm

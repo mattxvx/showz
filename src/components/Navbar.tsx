@@ -1,5 +1,5 @@
 import React from 'react';
-import { Music, Shield, ShieldCheck, Heart, Download, Plus, Sparkles } from 'lucide-react';
+import { Music, Shield, ShieldCheck, Heart, Download, Plus } from 'lucide-react';
 
 interface NavbarProps {
   isAdmin: boolean;

@@ -1,4 +1,4 @@
-import { ShowEvent } from '../types';
+import type { ShowEvent } from '../types';
 
 export const FLYER_PRESETS = [
   {
