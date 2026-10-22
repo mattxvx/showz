@@ -50,7 +50,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-safe bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
         className="relative w-full max-w-md overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6"
         onClick={(e) => e.stopPropagation()}
