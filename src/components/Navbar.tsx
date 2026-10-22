@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold tracking-tight text-xl bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-                GigPulse
+                Showz
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
                 PWA

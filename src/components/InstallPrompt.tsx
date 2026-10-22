@@ -20,7 +20,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ canInstall, onInst
           </div>
           <div>
             <h4 className="text-xs font-bold text-white flex items-center gap-1">
-              <span>Install GigPulse App</span>
+              <span>Install Showz App</span>
               <Sparkles className="w-3 h-3 text-pink-400" />
             </h4>
             <p className="text-[11px] text-slate-300">

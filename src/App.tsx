@@ -501,7 +501,7 @@ export function App() {
       <footer className="mt-auto border-t border-slate-900 bg-slate-950/80 py-6 px-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-300">GigPulse PWA</span>
+            <span className="font-bold text-slate-300">Showz PWA</span>
             <span>•</span>
             <span>Hosted on GitHub Pages</span>
             <span>•</span>

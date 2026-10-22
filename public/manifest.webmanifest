@@ -1,6 +1,6 @@
 {
-  "name": "GigPulse - Local Shows & Live Music",
-  "short_name": "GigPulse",
+  "name": "Showz - Local Shows & Live Music",
+  "short_name": "Showz",
   "description": "Discover local music events, indie gigs, and concerts. Admin event management.",
   "start_url": "./",
   "scope": "./",
