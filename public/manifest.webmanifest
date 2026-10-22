@@ -1,13 +1,13 @@
 {
-  "name": "Showz - Local Shows & Live Music",
-  "short_name": "Showz",
-  "description": "Discover local music events, indie gigs, and concerts. Admin event management.",
+  "name": "SHOWZ - Hardcore Gigs & Live Shows",
+  "short_name": "SHOWZ HC",
+  "description": "Underground hardcore shows, beatdown, metallic hardcore, and crossover gig finder.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#020617",
-  "theme_color": "#0f172a",
+  "background_color": "#000000",
+  "theme_color": "#09090b",
   "categories": ["music", "entertainment", "events"],
   "icons": [
     {

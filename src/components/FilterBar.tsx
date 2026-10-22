@@ -18,13 +18,13 @@ interface FilterBarProps {
 
 const ALL_GENRES: (EventGenre | 'All')[] = [
   'All',
-  'Indie Rock',
-  'Electronic',
-  'Jazz & Blues',
-  'Punk / Metal',
-  'Hip-Hop',
-  'Acoustic & Folk',
-  'Synthwave',
+  'Beatdown / Heavy HC',
+  'Metallic Hardcore',
+  'NYHC / Traditional',
+  'Crossover Thrash',
+  'Fast HC / Powerviolence',
+  'Death Metal / Grind',
+  'Post-Hardcore / Punk',
 ];
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -46,49 +46,49 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Search Input */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
             type="text"
-            placeholder="Search artists, venues, city, or genres..."
+            placeholder="Search bands, venues, cities (e.g. Sunami, Pain of Truth, VFW)..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all shadow-inner"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500 text-xs sm:text-sm font-bold focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all uppercase"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-neutral-400 hover:text-white"
             >
-              Clear
+              CLEAR
             </button>
           )}
         </div>
 
         {/* Date Filter Segmented Tabs */}
-        <div className="flex items-center p-1 rounded-2xl bg-slate-900 border border-slate-800 self-start sm:self-auto overflow-x-auto max-w-full">
+        <div className="flex items-center p-1 rounded-xl bg-neutral-950 border border-neutral-800 self-start sm:self-auto overflow-x-auto max-w-full">
           <button
             onClick={() => onDateFilterChange('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               dateFilter === 'all'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-neutral-400 hover:text-white'
             }`}
           >
-            All Dates
+            ALL DATES
           </button>
 
           <button
             onClick={() => onDateFilterChange('tonight')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               dateFilter === 'tonight'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-rose-300'
+                ? 'bg-red-700 text-white shadow-sm'
+                : 'text-neutral-400 hover:text-red-400'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
-            <span>Tonight</span>
+            <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+            <span>TONIGHT</span>
             {tonightCount > 0 && (
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/30 text-rose-200">
+              <span className="text-[10px] px-1.5 py-0.2 rounded font-black bg-red-950 text-red-200 border border-red-800">
                 {tonightCount}
               </span>
             )}
@@ -96,24 +96,24 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           <button
             onClick={() => onDateFilterChange('weekend')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               dateFilter === 'weekend'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-neutral-400 hover:text-white'
             }`}
           >
-            This Weekend
+            THIS WEEKEND
           </button>
 
           <button
             onClick={() => onDateFilterChange('upcoming')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               dateFilter === 'upcoming'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-neutral-400 hover:text-white'
             }`}
           >
-            Upcoming
+            UPCOMING
           </button>
         </div>
 
@@ -122,21 +122,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value as SortOption)}
-            className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 focus:outline-none focus:border-purple-500"
+            className="px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-neutral-300 focus:outline-none focus:border-red-600 uppercase"
           >
-            <option value="date-asc">Date (Soonest)</option>
-            <option value="date-desc">Date (Latest)</option>
-            <option value="price-asc">Price (Low to High)</option>
-            <option value="price-desc">Price (High to Low)</option>
+            <option value="date-asc">DATE (SOONEST)</option>
+            <option value="date-desc">DATE (LATEST)</option>
+            <option value="price-asc">DAMAGE (LOWEST)</option>
+            <option value="price-desc">DAMAGE (HIGHEST)</option>
           </select>
 
           {/* Grid vs List View Toggle */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-900 border border-slate-800">
+          <div className="flex items-center p-1 rounded-xl bg-neutral-950 border border-neutral-800">
             <button
               onClick={() => onViewModeChange('grid')}
               aria-label="Grid View"
               className={`p-1.5 rounded-lg transition-colors ${
-                viewMode === 'grid' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
+                viewMode === 'grid' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
               }`}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -145,7 +145,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               onClick={() => onViewModeChange('list')}
               aria-label="List View"
               className={`p-1.5 rounded-lg transition-colors ${
-                viewMode === 'list' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
+                viewMode === 'list' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
               }`}
             >
               <List className="w-4 h-4" />
@@ -162,10 +162,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <button
               key={genre}
               onClick={() => onGenreChange(genre)}
-              className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap border transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl font-bold uppercase whitespace-nowrap border transition-all cursor-pointer tracking-wider ${
                 isSelected
-                  ? 'bg-purple-600/20 text-purple-300 border-purple-500/60 shadow-sm'
-                  : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
+                  ? 'bg-red-600 text-white border-red-500 shadow-sm'
+                  : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-white'
               }`}
             >
               {genre}

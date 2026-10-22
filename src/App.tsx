@@ -9,6 +9,11 @@ import {
   importShowsFromJSON,
   resetShowsToDefaults,
 } from './utils/storage';
+import {
+  syncShowToCloud,
+  deleteShowFromCloud,
+  subscribeToCloudShows,
+} from './firebase';
 import { Navbar } from './components/Navbar';
 import { FilterBar } from './components/FilterBar';
 import { ShowCard } from './components/ShowCard';
@@ -18,7 +23,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { InstallPrompt } from './components/InstallPrompt';
 import {
-  Sparkles,
+  Flame,
   MapPin,
   Calendar,
   Compass,
@@ -32,6 +37,7 @@ export function App() {
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     return sessionStorage.getItem('gigpulse_is_admin') === 'true';
   });
+  const [isCloudConnected, setIsCloudConnected] = useState<boolean>(true);
 
   // Modals & Active Selections
   const [selectedShow, setSelectedShow] = useState<ShowEvent | null>(null);
@@ -59,6 +65,31 @@ export function App() {
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  // Real-time Cloud Sync with Firebase Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeToCloudShows(
+      (cloudShows) => {
+        setIsCloudConnected(true);
+        if (cloudShows.length > 0) {
+          setShows(cloudShows);
+          saveShowsToStorage(cloudShows);
+        } else {
+          // If Firestore is completely fresh and empty, seed it with sample hardcore shows!
+          const initialShows = loadShowsFromStorage();
+          initialShows.forEach((show) => {
+            syncShowToCloud(show).catch(() => {});
+          });
+        }
+      },
+      () => {
+        // Fallback to local storage if Firestore connection has an issue
+        setIsCloudConnected(false);
+      }
+    );
+
+    return () => unsubscribe();
   }, []);
 
   const handleInstallApp = async () => {
@@ -95,8 +126,9 @@ export function App() {
     });
   };
 
-  // Show Operations
-  const handleSaveShow = (showToSave: ShowEvent) => {
+  // Show Operations (writes to LocalStorage AND syncs to Firebase Cloud!)
+  const handleSaveShow = async (showToSave: ShowEvent) => {
+    // 1. Optimistic Local Update
     setShows((prev) => {
       const exists = prev.some((s) => s.id === showToSave.id);
       let updated: ShowEvent[];
@@ -112,13 +144,20 @@ export function App() {
     if (selectedShow?.id === showToSave.id) {
       setSelectedShow(showToSave);
     }
+
+    // 2. Cloud Firestore & Storage Sync
+    try {
+      await syncShowToCloud(showToSave);
+    } catch (err) {
+      console.warn('Saved locally, cloud sync pending:', err);
+    }
   };
 
   const handleDuplicateShow = (showToDuplicate: ShowEvent) => {
     const duplicated: ShowEvent = {
       ...showToDuplicate,
       id: `gig-${Date.now()}`,
-      title: `${showToDuplicate.title} (New Date)`,
+      title: `${showToDuplicate.title} (NEW DATE)`,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -131,7 +170,7 @@ export function App() {
     setIsAddEditOpen(true);
   };
 
-  const handleDeleteShow = (id: string) => {
+  const handleDeleteShow = async (id: string) => {
     setShows((prev) => {
       const updated = prev.filter((s) => s.id !== id);
       saveShowsToStorage(updated);
@@ -140,28 +179,54 @@ export function App() {
     if (selectedShow?.id === id) {
       setSelectedShow(null);
     }
+
+    // Cloud Delete
+    try {
+      await deleteShowFromCloud(id);
+    } catch (err) {
+      console.warn('Deleted locally, cloud delete notice:', err);
+    }
   };
 
-  const handleStatusChange = (id: string, status: EventStatus) => {
+  const handleStatusChange = async (id: string, status: EventStatus) => {
+    const targetShow = shows.find((s) => s.id === id);
+    if (!targetShow) return;
+
+    const updatedShow = { ...targetShow, status, updatedAt: Date.now() };
+
     setShows((prev) => {
-      const updated = prev.map((s) => (s.id === id ? { ...s, status, updatedAt: Date.now() } : s));
+      const updated = prev.map((s) => (s.id === id ? updatedShow : s));
       saveShowsToStorage(updated);
       return updated;
     });
+
+    try {
+      await syncShowToCloud(updatedShow);
+    } catch (err) {
+      console.warn('Status updated locally:', err);
+    }
   };
 
   const handleExportJSON = () => {
     exportShowsAsJSON(shows);
   };
 
-  const handleImportJSON = (jsonStr: string) => {
+  const handleImportJSON = async (jsonStr: string) => {
     const imported = importShowsFromJSON(jsonStr);
     setShows(imported);
+    // Sync all imported to cloud
+    for (const show of imported) {
+      syncShowToCloud(show).catch(() => {});
+    }
   };
 
   const handleResetDefaults = () => {
     const defaults = resetShowsToDefaults();
     setShows(defaults);
+    // Sync defaults to cloud
+    for (const show of defaults) {
+      syncShowToCloud(show).catch(() => {});
+    }
   };
 
   // Helper date diffs
@@ -195,7 +260,7 @@ export function App() {
       if (dateFilter === 'tonight' && diffDays !== 0) {
         return false;
       } else if (dateFilter === 'weekend') {
-        const dayOfWeek = showDate.getDay(); // 0 is Sunday, 5 is Friday, 6 is Saturday
+        const dayOfWeek = showDate.getDay();
         const isUpcomingWeekend = diffDays >= 0 && diffDays <= 7 && (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0);
         if (!isUpcomingWeekend) return false;
       } else if (dateFilter === 'upcoming') {
@@ -248,7 +313,7 @@ export function App() {
   }, [shows]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-purple-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-black text-zinc-100 selection:bg-red-600 selection:text-white">
       {/* Navbar */}
       <Navbar
         isAdmin={isAdmin}
@@ -262,17 +327,18 @@ export function App() {
         onToggleFavoritesOnly={() => setShowOnlyFavorites((prev) => !prev)}
         canInstall={canInstall}
         onInstallApp={handleInstallApp}
+        isCloudConnected={isCloudConnected}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-8">
-        {/* Admin Mode Warning / Quick Banner */}
+        {/* Admin Mode Warning Banner */}
         {isAdmin && (
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/80 via-indigo-950/60 to-purple-950/80 border border-purple-500/40 flex flex-wrap items-center justify-between gap-3 shadow-lg shadow-purple-950/20">
+          <div className="p-3.5 rounded-2xl bg-neutral-950 border border-red-600/80 flex flex-wrap items-center justify-between gap-3 shadow-xl shadow-red-950/40">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs font-bold text-purple-200">
-                Admin Mode Active: You can add new concerts, edit schedules, and manage events.
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+              <span className="text-xs font-black uppercase text-red-400 tracking-wider">
+                ADMIN MODE ACTIVE: All shows published are saved live to Firebase Cloud.
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -281,18 +347,18 @@ export function App() {
                   setEditingShow(null);
                   setIsAddEditOpen(true);
                 }}
-                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-black uppercase tracking-wider shadow transition-all cursor-pointer border border-red-500"
               >
-                + Add Show
+                + ADD GIG
               </button>
               <button
                 onClick={() => {
                   setIsAdmin(false);
                   sessionStorage.removeItem('gigpulse_is_admin');
                 }}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs font-bold uppercase border border-neutral-700 transition-all cursor-pointer"
               >
-                Exit Admin
+                EXIT ADMIN
               </button>
             </div>
           </div>
@@ -303,9 +369,9 @@ export function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-black text-white tracking-tight">Admin Event Center</h1>
-                <p className="text-xs text-slate-400">
-                  Manage all local gigs, track ticket status, and backup data.
+                <h1 className="text-2xl font-black text-white uppercase tracking-tight hc-font">HARDCORE GIG MANAGER</h1>
+                <p className="text-xs text-neutral-400 font-bold uppercase">
+                  Manage all local hardcore shows, lineups, damage, and flyer photos.
                 </p>
               </div>
             </div>
@@ -326,57 +392,58 @@ export function App() {
               onExportJSON={handleExportJSON}
               onImportJSON={handleImportJSON}
               onResetDefaults={handleResetDefaults}
+              isCloudConnected={isCloudConnected}
             />
           </div>
         ) : (
           /* Public Attendee View */
           <div className="space-y-8">
-            {/* Hero Featured Showcase (Shown when not filtering favorites) */}
+            {/* Hardcore Hero Showcase */}
             {!showOnlyFavorites && !searchQuery && featuredShow && (
               <div
                 onClick={() => setSelectedShow(featuredShow)}
-                className="relative rounded-3xl overflow-hidden border border-purple-500/40 bg-slate-900 shadow-2xl group cursor-pointer"
+                className="relative rounded-3xl overflow-hidden border-2 border-red-600/80 bg-neutral-950 shadow-2xl group cursor-pointer"
               >
-                <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full bg-slate-950">
+                <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full bg-black">
                   <img
                     src={featuredShow.flyerUrl}
                     alt={featuredShow.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover grayscale-[20%] contrast-125 transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
 
                   {/* Hero Content */}
                   <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end max-w-2xl">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-purple-600 text-white shadow-lg shadow-purple-900/50">
-                        <Sparkles className="w-3.5 h-3.5 fill-current" />
-                        SPOTLIGHT SHOW
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black bg-red-600 text-white shadow-lg uppercase tracking-wider">
+                        <Flame className="w-3.5 h-3.5 fill-current" />
+                        SPOTLIGHT HEADLINER
                       </span>
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-900/80 text-purple-300 border border-purple-500/30 backdrop-blur-md">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-black bg-black/90 text-red-400 border border-red-700 uppercase tracking-wider backdrop-blur-md">
                         {featuredShow.genre}
                       </span>
                     </div>
 
-                    <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight group-hover:text-purple-300 transition-colors">
+                    <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight uppercase group-hover:text-red-400 transition-colors hc-font">
                       {featuredShow.headliner}
                     </h2>
 
-                    <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 mt-1 mb-4">
+                    <p className="text-xs sm:text-sm text-neutral-300 line-clamp-2 mt-1 mb-4 font-bold uppercase tracking-wide">
                       {featuredShow.description}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-300">
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-black uppercase text-neutral-300">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-purple-400" />
-                        <span className="font-bold text-white">{featuredShow.date}</span>
+                        <Calendar className="w-4 h-4 text-red-500" />
+                        <span className="text-white">{featuredShow.date}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4 text-rose-400" />
+                        <MapPin className="w-4 h-4 text-red-500" />
                         <span>{featuredShow.venue}</span>
                       </div>
-                      <span className="px-2.5 py-0.5 rounded-full font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/30">
-                        {featuredShow.price === 'Free' ? 'Free Admission' : `$${featuredShow.price}`}
+                      <span className="px-2.5 py-0.5 rounded font-black text-white bg-red-950 border border-red-700">
+                        {featuredShow.price === 'Free' ? 'FREE ENTRY' : `DAMAGE: $${featuredShow.price}`}
                       </span>
                     </div>
                   </div>
@@ -402,41 +469,41 @@ export function App() {
             {/* Shows Header Count */}
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-2">
-                <Radio className="w-4 h-4 text-purple-400 animate-pulse" />
-                <h3 className="text-lg font-extrabold text-white">
+                <Radio className="w-4 h-4 text-red-500 animate-pulse" />
+                <h3 className="text-lg font-black text-white uppercase tracking-wider hc-font">
                   {showOnlyFavorites
-                    ? 'Saved Shows'
+                    ? 'BOOKMARKED GIGS'
                     : dateFilter === 'tonight'
-                    ? 'Happening Tonight'
+                    ? 'PITS TONIGHT'
                     : dateFilter === 'weekend'
-                    ? 'This Weekend'
-                    : 'Upcoming Shows'}
+                    ? 'THIS WEEKEND'
+                    : 'UPCOMING SHOWS'}
                 </h3>
-                <span className="text-xs text-slate-400">({filteredShows.length} found)</span>
+                <span className="text-xs font-bold text-neutral-500">({filteredShows.length} FOUND)</span>
               </div>
 
               {showOnlyFavorites && (
                 <button
                   onClick={() => setShowOnlyFavorites(false)}
-                  className="text-xs text-purple-400 hover:text-purple-300 underline font-semibold cursor-pointer"
+                  className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider underline cursor-pointer"
                 >
-                  View all shows
+                  VIEW ALL GIGS
                 </button>
               )}
             </div>
 
             {/* Shows Grid / List */}
             {filteredShows.length === 0 ? (
-              <div className="py-16 text-center space-y-4 rounded-3xl bg-slate-900/50 border border-slate-800 p-8">
-                <div className="w-16 h-16 rounded-2xl bg-slate-800/80 mx-auto flex items-center justify-center text-slate-500">
+              <div className="py-16 text-center space-y-4 rounded-3xl bg-neutral-950 border border-neutral-800 p-8">
+                <div className="w-16 h-16 rounded-2xl bg-neutral-900 mx-auto flex items-center justify-center text-red-500 border border-neutral-800">
                   <Compass className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-base font-bold text-white">No shows found</h4>
-                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  <h4 className="text-base font-black text-white uppercase hc-font">NO GIGS FOUND</h4>
+                  <p className="text-xs font-bold text-neutral-400 max-w-sm mx-auto uppercase">
                     {showOnlyFavorites
-                      ? 'You haven’t saved any shows yet. Tap the heart on any gig to bookmark it!'
-                      : 'Try resetting your search query or switching date/genre filters.'}
+                      ? 'No saved gigs yet. Hit the heart button on any show card to bookmark it!'
+                      : 'Try clearing your search query or switching date filters.'}
                   </p>
                 </div>
                 {(searchQuery || selectedGenre !== 'All' || dateFilter !== 'all' || showOnlyFavorites) && (
@@ -447,9 +514,9 @@ export function App() {
                       setDateFilter('all');
                       setShowOnlyFavorites(false);
                     }}
-                    className="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-500 transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-black uppercase hover:bg-red-500 transition-colors cursor-pointer border border-red-500"
                   >
-                    Clear All Filters
+                    RESET ALL FILTERS
                   </button>
                 )}
               </div>
@@ -473,7 +540,6 @@ export function App() {
                 ))}
               </div>
             ) : (
-              /* Compact List View */
               <div className="space-y-3">
                 {filteredShows.map((show) => (
                   <ShowCard
@@ -498,31 +564,31 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-900 bg-slate-950/80 pt-6 safe-bottom px-4 text-center text-xs text-slate-500">
+      <footer className="mt-auto border-t border-neutral-900 bg-black/95 pt-6 safe-bottom px-4 text-center text-xs text-neutral-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-300">Showz PWA</span>
+          <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-[11px]">
+            <span className="text-white">SHOWZ HARDCORE PWA</span>
             <span>•</span>
-            <span>Hosted on GitHub Pages</span>
+            <span className="text-red-500">REALTIME CLOUD SYNC</span>
             <span>•</span>
-            <span className="text-emerald-400">Offline-Ready Service Worker</span>
+            <span className="text-neutral-400">OFFLINE READY</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider">
             <button
               onClick={handleToggleAdmin}
-              className="text-slate-400 hover:text-purple-400 transition-colors cursor-pointer"
+              className="text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
             >
-              {isAdmin ? 'Exit Admin Mode' : 'Admin Login (Demo: 1234)'}
+              {isAdmin ? 'EXIT ADMIN' : 'ADMIN LOGIN (DEMO: 1234)'}
             </button>
             <button
               onClick={() => {
-                if (confirm('Reset shows to fresh demo dataset?')) {
+                if (confirm('Reset to sample hardcore bands (Sunami, Hatebreed, Drain, etc.)?')) {
                   handleResetDefaults();
                 }
               }}
-              className="text-slate-500 hover:text-slate-300 transition-colors"
+              className="text-neutral-600 hover:text-neutral-400 transition-colors"
             >
-              Reset Sample Shows
+              RESET SAMPLE GIGS
             </button>
           </div>
         </div>

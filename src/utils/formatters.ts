@@ -11,9 +11,9 @@ export function formatEventDate(dateStr: string): { label: string; isTonight: bo
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    return { label: 'Tonight', isTonight: true, isTomorrow: false };
+    return { label: 'TONIGHT', isTonight: true, isTomorrow: false };
   } else if (diffDays === 1) {
-    return { label: 'Tomorrow', isTonight: false, isTomorrow: true };
+    return { label: 'TOMORROW', isTonight: false, isTomorrow: true };
   }
 
   const options: Intl.DateTimeFormatOptions = {
@@ -22,7 +22,7 @@ export function formatEventDate(dateStr: string): { label: string; isTonight: bo
     day: 'numeric',
   };
   return {
-    label: eventDate.toLocaleDateString(undefined, options),
+    label: eventDate.toLocaleDateString(undefined, options).toUpperCase(),
     isTonight: false,
     isTomorrow: false,
   };
@@ -40,33 +40,33 @@ export function formatTime(timeStr: string): string {
 
 export function getGenreColor(genre: EventGenre): { bg: string; text: string; border: string } {
   switch (genre) {
-    case 'Indie Rock':
-      return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' };
-    case 'Electronic':
-      return { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30' };
-    case 'Jazz & Blues':
-      return { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' };
-    case 'Punk / Metal':
-      return { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30' };
-    case 'Hip-Hop':
-      return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30' };
-    case 'Acoustic & Folk':
-      return { bg: 'bg-teal-500/10', text: 'text-teal-400', border: 'border-teal-500/30' };
-    case 'Synthwave':
-      return { bg: 'bg-pink-500/10', text: 'text-pink-400', border: 'border-pink-500/30' };
+    case 'Beatdown / Heavy HC':
+      return { bg: 'bg-red-950/80', text: 'text-red-400', border: 'border-red-600/70' };
+    case 'Metallic Hardcore':
+      return { bg: 'bg-orange-950/80', text: 'text-orange-400', border: 'border-orange-600/70' };
+    case 'NYHC / Traditional':
+      return { bg: 'bg-amber-950/80', text: 'text-amber-400', border: 'border-amber-600/70' };
+    case 'Crossover Thrash':
+      return { bg: 'bg-yellow-950/80', text: 'text-yellow-400', border: 'border-yellow-600/70' };
+    case 'Fast HC / Powerviolence':
+      return { bg: 'bg-lime-950/80', text: 'text-lime-400', border: 'border-lime-500/70' };
+    case 'Death Metal / Grind':
+      return { bg: 'bg-zinc-900', text: 'text-zinc-200', border: 'border-zinc-500/70' };
+    case 'Post-Hardcore / Punk':
+      return { bg: 'bg-neutral-900', text: 'text-neutral-300', border: 'border-neutral-600/70' };
     default:
-      return { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' };
+      return { bg: 'bg-red-950/60', text: 'text-red-300', border: 'border-red-800' };
   }
 }
 
 export function getStatusBadge(status: EventStatus): { text: string; color: string } | null {
   switch (status) {
     case 'selling-fast':
-      return { text: 'Selling Fast', color: 'bg-orange-500/20 text-orange-300 border-orange-500/40' };
+      return { text: 'LOW TICKETS', color: 'bg-red-600 text-white border-red-500 font-black animate-pulse' };
     case 'sold-out':
-      return { text: 'Sold Out', color: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
+      return { text: 'SOLD OUT / NO DOOR', color: 'bg-neutral-900 text-neutral-400 border-neutral-700 font-black' };
     case 'cancelled':
-      return { text: 'Cancelled', color: 'bg-slate-700 text-slate-300 border-slate-600' };
+      return { text: 'GIG CANCELLED', color: 'bg-zinc-950 text-red-500 border-red-900 font-bold' };
     default:
       return null;
   }

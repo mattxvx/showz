@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ShowEvent, EventGenre, EventStatus, AgeRestriction } from '../types';
 import { FLYER_PRESETS } from '../data/sampleShows';
-import { X, Upload, Sparkles, Check } from 'lucide-react';
+import { X, Upload, Flame, Check } from 'lucide-react';
 
 interface AdminShowModalProps {
   isOpen: boolean;
@@ -11,21 +11,20 @@ interface AdminShowModalProps {
 }
 
 const GENRES: EventGenre[] = [
-  'Indie Rock',
-  'Electronic',
-  'Jazz & Blues',
-  'Punk / Metal',
-  'Hip-Hop',
-  'Acoustic & Folk',
-  'Synthwave',
-  'Classical / Ambient',
-  'Other',
+  'Beatdown / Heavy HC',
+  'Metallic Hardcore',
+  'NYHC / Traditional',
+  'Crossover Thrash',
+  'Fast HC / Powerviolence',
+  'Death Metal / Grind',
+  'Post-Hardcore / Punk',
+  'Mixed Bill',
 ];
 
 const STATUSES: { value: EventStatus; label: string }[] = [
-  { value: 'active', label: 'Active / On Sale' },
-  { value: 'selling-fast', label: 'Selling Fast' },
-  { value: 'sold-out', label: 'Sold Out' },
+  { value: 'active', label: 'Active / Tickets Available' },
+  { value: 'selling-fast', label: 'Low Tickets Warning' },
+  { value: 'sold-out', label: 'Sold Out / No Door Tickets' },
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
@@ -45,22 +44,24 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
     address: '',
     city: '',
     date: new Date().toISOString().slice(0, 10),
-    doorsTime: '19:30',
-    startTime: '20:30',
-    endTime: '23:30',
-    genre: 'Indie Rock',
-    price: 15,
+    doorsTime: '18:30',
+    startTime: '19:00',
+    endTime: '23:00',
+    genre: 'Beatdown / Heavy HC',
+    price: 20,
     ticketUrl: '',
     flyerUrl: FLYER_PRESETS[0].url,
     description: '',
-    ageRestriction: '18+',
+    ageRestriction: 'All Ages',
     status: 'active',
     featured: false,
+    stageDivesAllowed: true,
   });
 
   const [supportsInput, setSupportsInput] = useState('');
   const [isFree, setIsFree] = useState(false);
   const [customFlyerUrl, setCustomFlyerUrl] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (editingShow) {
@@ -69,7 +70,6 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
       setIsFree(editingShow.price === 'Free');
       setCustomFlyerUrl(editingShow.flyerUrl || '');
     } else {
-      // Reset form for new show
       setFormData({
         title: '',
         headliner: '',
@@ -78,17 +78,18 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
         address: '',
         city: 'Local Area',
         date: new Date().toISOString().slice(0, 10),
-        doorsTime: '19:30',
-        startTime: '20:30',
-        endTime: '23:30',
-        genre: 'Indie Rock',
-        price: 15,
+        doorsTime: '18:30',
+        startTime: '19:00',
+        endTime: '23:00',
+        genre: 'Beatdown / Heavy HC',
+        price: 20,
         ticketUrl: '',
         flyerUrl: FLYER_PRESETS[0].url,
         description: '',
-        ageRestriction: '18+',
+        ageRestriction: 'All Ages',
         status: 'active',
         featured: false,
+        stageDivesAllowed: true,
       });
       setSupportsInput('');
       setIsFree(false);
@@ -110,19 +111,19 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.headliner?.trim()) {
-      alert('Please enter at least the Headliner / Artist name');
+      alert('Please enter at least the Headliner / Main band name');
       return;
     }
     if (!formData.venue?.trim()) {
-      alert('Please enter the Venue name');
+      alert('Please enter the Venue or Hall name');
       return;
     }
     if (!formData.date) {
-      alert('Please select a Date for the event');
+      alert('Please select a Date for the gig');
       return;
     }
 
@@ -134,16 +135,16 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
     const fullShow: ShowEvent = {
       id: editingShow?.id || `gig-${Date.now()}`,
       title: formData.title?.trim() || formData.headliner.trim(),
-      headliner: formData.headliner.trim(),
-      supportActs,
+      headliner: formData.headliner.trim().toUpperCase(),
+      supportActs: supportActs.map((s) => s.toUpperCase()),
       venue: formData.venue?.trim() || 'TBA',
-      address: formData.address?.trim() || 'Main Hall',
-      city: formData.city?.trim() || 'Local City',
+      address: formData.address?.trim() || 'Local VFW / Hall',
+      city: formData.city?.trim() || 'Local Area',
       date: formData.date || new Date().toISOString().slice(0, 10),
-      doorsTime: formData.doorsTime || '19:30',
-      startTime: formData.startTime || '20:30',
-      endTime: formData.endTime || '23:30',
-      genre: (formData.genre as EventGenre) || 'Indie Rock',
+      doorsTime: formData.doorsTime || '18:30',
+      startTime: formData.startTime || '19:00',
+      endTime: formData.endTime || '23:00',
+      genre: (formData.genre as EventGenre) || 'Beatdown / Heavy HC',
       price: isFree ? 'Free' : Number(formData.price) || 0,
       ticketUrl: formData.ticketUrl?.trim() || '',
       flyerUrl: formData.flyerUrl || FLYER_PRESETS[0].url,
@@ -151,38 +152,44 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
       ageRestriction: (formData.ageRestriction as AgeRestriction) || 'All Ages',
       status: (formData.status as EventStatus) || 'active',
       featured: Boolean(formData.featured),
+      stageDivesAllowed: formData.stageDivesAllowed ?? true,
       createdAt: editingShow?.createdAt || Date.now(),
       updatedAt: Date.now(),
     };
 
-    onSave(fullShow);
-    onClose();
+    setIsSaving(true);
+    try {
+      await onSave(fullShow);
+      onClose();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 modal-safe bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 modal-safe bg-black/90 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-3xl max-h-[94vh] overflow-y-auto rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl flex flex-col my-auto"
+        className="relative w-full max-w-3xl max-h-[94vh] overflow-y-auto rounded-3xl bg-neutral-950 border border-neutral-800 shadow-2xl flex flex-col my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900/95 px-6 py-4 backdrop-blur-md">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-800 bg-neutral-950/95 px-6 py-4 backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-purple-600/20 text-purple-400">
-              <Sparkles className="w-5 h-5" />
+            <span className="p-2 rounded-xl bg-red-600/20 text-red-500 border border-red-800">
+              <Flame className="w-5 h-5" />
             </span>
             <div>
-              <h2 className="text-xl font-black text-white">
-                {editingShow ? 'Edit Show / Gig' : 'Add New Local Show'}
+              <h2 className="text-xl font-black text-white uppercase tracking-tight hc-font">
+                {editingShow ? 'EDIT HARDCORE GIG' : 'ADD HARDCORE GIG'}
               </h2>
-              <p className="text-xs text-slate-400">
-                {editingShow ? 'Update show details, lineup, or status' : 'Publish a new concert to the local roster'}
+              <p className="text-xs text-neutral-400">
+                Syncs live to Firebase Cloud Database for all attendees.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -192,166 +199,166 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Main Info */}
           <div className="space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              1. Artist & Lineup
+            <h3 className="text-xs font-black uppercase tracking-wider text-red-500">
+              1. BANDS & LINEUP
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Headliner / Main Act <span className="text-rose-400">*</span>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Headliner / Main Act <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Arctic Monkeys, The Black Keys"
+                  placeholder="e.g. SUNAMI, HATEBREED, DRAIN"
                   value={formData.headliner || ''}
                   onChange={(e) => setFormData({ ...formData, headliner: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600 uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Show / Tour Title (Optional)
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Tour / Gig Title (Optional)
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Summer Solstice Fest, Album Tour"
+                  placeholder="e.g. REAL BAY SHIT TOUR, BENEFIT GIG"
                   value={formData.title || ''}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600 uppercase"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
                 Supporting Acts (Comma-separated)
               </label>
               <input
                 type="text"
-                placeholder="e.g. Band A, Band B, DJ Neon"
+                placeholder="e.g. PAIN OF TRUTH, GRIDIRON, TERROR, SPEED"
                 value={supportsInput}
                 onChange={(e) => setSupportsInput(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600 uppercase"
               />
             </div>
           </div>
 
-          {/* Date, Time & Location */}
-          <div className="space-y-4 pt-2 border-t border-slate-800">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              2. Venue, Date & Timing
+          {/* Date, Time & Venue */}
+          <div className="space-y-4 pt-2 border-t border-neutral-800">
+            <h3 className="text-xs font-black uppercase tracking-wider text-red-500">
+              2. VENUE, DATE & SET TIMES
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Venue Name <span className="text-rose-400">*</span>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Venue Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. The Empty Bottle"
+                  placeholder="e.g. VFW Post 11, The Meat Locker"
                   value={formData.venue || ''}
                   onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600 uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
                   Street Address
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. 1035 N Western Ave"
+                  placeholder="e.g. 88 Industrial Way"
                   value={formData.address || ''}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600 uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  City / Neighborhood
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  City / Region
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Chicago, IL"
+                  placeholder="e.g. Brooklyn, NY"
                   value={formData.city || ''}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600 uppercase"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Date <span className="text-rose-400">*</span>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
                   required
                   value={formData.date || ''}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
                   Doors Open
                 </label>
                 <input
                   type="time"
                   value={formData.doorsTime || ''}
                   onChange={(e) => setFormData({ ...formData, doorsTime: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Show Starts <span className="text-rose-400">*</span>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  First Band Starts <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="time"
                   required
                   value={formData.startTime || ''}
                   onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Curfew / End
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Curfew
                 </label>
                 <input
                   type="time"
                   value={formData.endTime || ''}
                   onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl bg-black border border-neutral-800 text-white text-sm font-bold focus:outline-none focus:border-red-600"
                 />
               </div>
             </div>
           </div>
 
-          {/* Genre, Tickets & Price */}
-          <div className="space-y-4 pt-2 border-t border-slate-800">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              3. Category, Pricing & Status
+          {/* Genre & Pricing */}
+          <div className="space-y-4 pt-2 border-t border-neutral-800">
+            <h3 className="text-xs font-black uppercase tracking-wider text-red-500">
+              3. CATEGORY, DAMAGE & STATUS
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Genre</label>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">Hardcore Subgenre</label>
                 <select
                   value={formData.genre}
                   onChange={(e) => setFormData({ ...formData, genre: e.target.value as EventGenre })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-xs font-bold focus:outline-none focus:border-red-600 uppercase"
                 >
                   {GENRES.map((g) => (
                     <option key={g} value={g}>
@@ -362,11 +369,11 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Status</label>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-xs font-bold focus:outline-none focus:border-red-600 uppercase"
                 >
                   {STATUSES.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -377,13 +384,13 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Age Policy</label>
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">Age Policy</label>
                 <select
                   value={formData.ageRestriction}
                   onChange={(e) =>
                     setFormData({ ...formData, ageRestriction: e.target.value as AgeRestriction })
                   }
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-xs font-bold focus:outline-none focus:border-red-600 uppercase"
                 >
                   {AGES.map((age) => (
                     <option key={age} value={age}>
@@ -397,77 +404,90 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-slate-300">Admission Price ($)</label>
-                  <label className="flex items-center gap-1.5 text-xs text-purple-300 font-medium cursor-pointer">
+                  <label className="text-xs font-bold text-neutral-300 uppercase">Damage ($)</label>
+                  <label className="flex items-center gap-1.5 text-xs text-red-400 font-bold cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isFree}
                       onChange={(e) => {
                         setIsFree(e.target.checked);
                         if (e.target.checked) setFormData({ ...formData, price: 'Free' });
-                        else setFormData({ ...formData, price: 15 });
+                        else setFormData({ ...formData, price: 20 });
                       }}
-                      className="rounded bg-slate-950 border-slate-700 text-purple-600 focus:ring-0"
+                      className="rounded bg-black border-neutral-700 text-red-600 focus:ring-0"
                     />
-                    <span>Free Entry Show</span>
+                    <span>FREE / DONATION</span>
                   </label>
                 </div>
                 <input
                   type="number"
                   disabled={isFree}
                   min="0"
-                  step="0.5"
-                  placeholder="e.g. 15"
+                  step="1"
+                  placeholder="e.g. 20"
                   value={isFree ? '' : formData.price || ''}
                   onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                  className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border text-sm transition-colors ${
+                  className={`w-full px-3.5 py-2.5 rounded-xl bg-black border text-sm font-bold transition-colors ${
                     isFree
-                      ? 'border-slate-800 text-slate-500 cursor-not-allowed'
-                      : 'border-slate-800 text-white focus:outline-none focus:border-purple-500'
+                      ? 'border-neutral-800 text-neutral-600 cursor-not-allowed'
+                      : 'border-neutral-800 text-white focus:outline-none focus:border-red-600'
                   }`}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
                   Ticket Purchase URL (Optional)
                 </label>
                 <input
                   type="url"
-                  placeholder="https://eventbrite.com/e/..."
+                  placeholder="https://..."
                   value={formData.ticketUrl || ''}
                   onChange={(e) => setFormData({ ...formData, ticketUrl: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-600"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="featuredCheck"
-                checked={Boolean(formData.featured)}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-purple-600 focus:ring-0 cursor-pointer"
-              />
-              <label htmlFor="featuredCheck" className="text-xs font-medium text-slate-200 cursor-pointer">
-                Spotlight this event as a <strong className="text-purple-300">Featured Gig</strong> on the homepage
+            <div className="flex flex-wrap items-center gap-6 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(formData.stageDivesAllowed)}
+                  onChange={(e) => setFormData({ ...formData, stageDivesAllowed: e.target.checked })}
+                  className="w-4 h-4 rounded bg-black border-neutral-700 text-red-600 focus:ring-0 cursor-pointer"
+                />
+                <span className="text-xs font-bold text-neutral-200 uppercase">
+                  Stage Dives Encouraged (No Barricade)
+                </span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(formData.featured)}
+                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                  className="w-4 h-4 rounded bg-black border-neutral-700 text-red-600 focus:ring-0 cursor-pointer"
+                />
+                <span className="text-xs font-bold text-red-400 uppercase">
+                  Spotlight as Headliner Banner
+                </span>
               </label>
             </div>
           </div>
 
-          {/* Flyer Image Selector */}
-          <div className="space-y-3 pt-2 border-t border-slate-800">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              4. Event Flyer / Cover Artwork
+          {/* Flyer Selection */}
+          <div className="space-y-3 pt-2 border-t border-neutral-800">
+            <h3 className="text-xs font-black uppercase tracking-wider text-red-500">
+              4. GIG FLYER / ARTWORK
             </h3>
 
             {/* Presets Gallery */}
             <div>
-              <p className="text-xs text-slate-400 mb-2">
-                Choose a pre-curated concert atmosphere or upload your own flyer:
+              <p className="text-xs text-neutral-400 mb-2 font-bold uppercase">
+                Choose a hardcore pit preset or upload your local show flyer:
               </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {FLYER_PRESETS.map((preset) => {
                   const isSelected = formData.flyerUrl === preset.url;
                   return (
@@ -480,18 +500,18 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
                       }}
                       className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all cursor-pointer group ${
                         isSelected
-                          ? 'border-purple-500 shadow-md shadow-purple-900/50 scale-105'
-                          : 'border-slate-800 hover:border-slate-600 opacity-70 hover:opacity-100'
+                          ? 'border-red-600 shadow-md shadow-red-950 scale-105'
+                          : 'border-neutral-800 hover:border-neutral-600 opacity-60 hover:opacity-100'
                       }`}
                     >
-                      <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                      <img src={preset.url} alt={preset.name} className="w-full h-full object-cover grayscale contrast-125" />
                       {isSelected && (
-                        <div className="absolute inset-0 bg-purple-900/40 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-red-900/50 flex items-center justify-center">
                           <Check className="w-5 h-5 text-white" />
                         </div>
                       )}
-                      <span className="absolute bottom-0 inset-x-0 text-[10px] bg-slate-950/80 text-slate-300 px-1 py-0.5 truncate text-center">
-                        {preset.genre}
+                      <span className="absolute bottom-0 inset-x-0 text-[9px] bg-black/90 text-white font-black px-1 py-0.5 truncate text-center uppercase">
+                        {preset.name}
                       </span>
                     </button>
                   );
@@ -499,33 +519,31 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
               </div>
             </div>
 
-            {/* Custom URL or File Upload */}
+            {/* Custom URL or Upload */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Or enter image URL
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Or Paste Image URL
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={customFlyerUrl}
-                    onChange={(e) => {
-                      setCustomFlyerUrl(e.target.value);
-                      if (e.target.value) setFormData({ ...formData, flyerUrl: e.target.value });
-                    }}
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-purple-500"
-                  />
-                </div>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={customFlyerUrl}
+                  onChange={(e) => {
+                    setCustomFlyerUrl(e.target.value);
+                    if (e.target.value) setFormData({ ...formData, flyerUrl: e.target.value });
+                  }}
+                  className="w-full px-3 py-2 rounded-xl bg-black border border-neutral-800 text-white text-xs focus:outline-none focus:border-red-600"
+                />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Or upload image file from device
+                <label className="block text-xs font-bold text-neutral-300 mb-1 uppercase">
+                  Or Upload From Device (Camera Roll)
                 </label>
-                <label className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-950 border border-dashed border-slate-700 hover:border-purple-500 text-slate-300 text-xs font-medium cursor-pointer transition-colors">
-                  <Upload className="w-4 h-4 text-purple-400" />
-                  <span>Choose local file...</span>
+                <label className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-black border border-dashed border-neutral-700 hover:border-red-500 text-neutral-300 text-xs font-bold cursor-pointer transition-colors uppercase">
+                  <Upload className="w-4 h-4 text-red-500" />
+                  <span>CHOOSE FLYER FILE...</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -537,34 +555,36 @@ export const AdminShowModal: React.FC<AdminShowModalProps> = ({
             </div>
           </div>
 
-          {/* Description */}
-          <div className="space-y-2 pt-2 border-t border-slate-800">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              5. Description & Sound Notes
+          {/* Description / Pit info */}
+          <div className="space-y-2 pt-2 border-t border-neutral-800">
+            <h3 className="text-xs font-black uppercase tracking-wider text-red-500">
+              5. PIT NOTES & GIG INFO
             </h3>
             <textarea
               rows={3}
-              placeholder="Tell attendees what to expect: music style, stage vibe, set times, drink specials, merch table..."
+              placeholder="e.g. Stage dives strictly encouraged. Respect the venue. Merch table in the back. No fighting / no hate speech."
               value={formData.description || ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-600 transition-colors"
             />
           </div>
 
           {/* Footer CTAs */}
-          <div className="sticky bottom-0 -mx-6 -mb-6 border-t border-slate-800 bg-slate-900/95 p-4 sm:px-6 flex items-center justify-end gap-3 backdrop-blur-md">
+          <div className="sticky bottom-0 -mx-6 -mb-6 border-t border-neutral-800 bg-neutral-950/95 p-4 sm:px-6 flex items-center justify-end gap-3 backdrop-blur-md">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 text-sm font-semibold transition-colors cursor-pointer"
+              disabled={isSaving}
+              className="px-4 py-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-900 text-xs font-black uppercase transition-colors cursor-pointer"
             >
-              Cancel
+              CANCEL
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-purple-900/30 hover:brightness-110 transition-all cursor-pointer"
+              disabled={isSaving}
+              className="px-6 py-2.5 rounded-xl bg-red-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-red-950 hover:bg-red-500 transition-all cursor-pointer border border-red-500"
             >
-              {editingShow ? 'Save Changes' : 'Publish Show'}
+              {isSaving ? 'SYNCING TO CLOUD...' : editingShow ? 'SAVE GIG' : 'PUBLISH GIG'}
             </button>
           </div>
         </form>
