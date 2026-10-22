@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ViewFilter, EventGenre, SortOption } from '../types';
-import { Search, LayoutGrid, List } from 'lucide-react';
+import { Search, LayoutGrid, List, Calendar as CalendarIcon } from 'lucide-react';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -14,6 +14,9 @@ interface FilterBarProps {
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
   tonightCount: number;
+  isCalendarOpen: boolean;
+  onToggleCalendar: () => void;
+  hasActiveCalendarDate: boolean;
 }
 
 const ALL_GENRES: (EventGenre | 'All')[] = [
@@ -39,6 +42,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   viewMode,
   onViewModeChange,
   tonightCount,
+  isCalendarOpen,
+  onToggleCalendar,
+  hasActiveCalendarDate,
 }) => {
   return (
     <div className="space-y-4">
@@ -49,7 +55,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
             type="text"
-            placeholder="Search bands, venues, cities (e.g. Sunami, Pain of Truth, VFW)..."
+            placeholder="Search bands, venues, cities (e.g. Sunami, Minor Threat, CBGB)..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500 text-xs sm:text-sm font-bold focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all uppercase"
@@ -69,7 +75,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <button
             onClick={() => onDateFilterChange('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-              dateFilter === 'all'
+              dateFilter === 'all' && !hasActiveCalendarDate
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'text-neutral-400 hover:text-white'
             }`}
@@ -80,7 +86,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <button
             onClick={() => onDateFilterChange('tonight')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-              dateFilter === 'tonight'
+              dateFilter === 'tonight' && !hasActiveCalendarDate
                 ? 'bg-red-700 text-white shadow-sm'
                 : 'text-neutral-400 hover:text-red-400'
             }`}
@@ -97,7 +103,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <button
             onClick={() => onDateFilterChange('weekend')}
             className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-              dateFilter === 'weekend'
+              dateFilter === 'weekend' && !hasActiveCalendarDate
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'text-neutral-400 hover:text-white'
             }`}
@@ -108,7 +114,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <button
             onClick={() => onDateFilterChange('upcoming')}
             className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-              dateFilter === 'upcoming'
+              dateFilter === 'upcoming' && !hasActiveCalendarDate
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'text-neutral-400 hover:text-white'
             }`}
@@ -117,8 +123,26 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           </button>
         </div>
 
-        {/* Sort & View Mode Controls */}
+        {/* Calendar Toggle & View Mode Controls */}
         <div className="flex items-center gap-2 self-end sm:self-auto">
+          {/* Mini Calendar Toggle Button */}
+          <button
+            type="button"
+            onClick={onToggleCalendar}
+            title="Toggle Date Picker Calendar with Red Dot indicators"
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer ${
+              isCalendarOpen
+                ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-950'
+                : hasActiveCalendarDate
+                ? 'bg-red-950 text-red-300 border-red-700'
+                : 'bg-neutral-950 text-neutral-300 border-neutral-800 hover:border-red-600 hover:text-white'
+            }`}
+          >
+            <CalendarIcon className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">CALENDAR</span>
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          </button>
+
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value as SortOption)}

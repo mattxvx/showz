@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="800" height="1100">
+  <defs>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.12 0" />
+      <feComposite in2="SourceGraphic" in="color" operator="in" />
+    </filter>
+  </defs>
+
+  <!-- Weathered Xerox Paper -->
+  <rect width="800" height="1100" fill="#f4efe6"/>
+  <rect width="800" height="1100" fill="#000000" opacity="0.04" filter="url(#noise)"/>
+
+  <!-- Rough Cut Photocopy Border -->
+  <rect x="25" y="25" width="750" height="1050" fill="none" stroke="#111111" stroke-width="8" stroke-dasharray="24 6 12 6"/>
+  <rect x="35" y="35" width="730" height="1030" fill="none" stroke="#111111" stroke-width="2"/>
+
+  <!-- Top Banner -->
+  <rect x="40" y="50" width="720" height="70" fill="#111111"/>
+  <text x="400" y="100" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="44" fill="#ffffff" text-anchor="middle" letter-spacing="6">DISCHORD RECORDS PRESENTS</text>
+
+  <!-- Giant Headliner -->
+  <g transform="translate(400, 240)">
+    <text x="0" y="0" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="88" fill="#111111" text-anchor="middle" letter-spacing="4">MINOR THREAT</text>
+    <line x1="-340" y1="20" x2="340" y2="20" stroke="#111111" stroke-width="10"/>
+    <text x="0" y="60" font-family="Courier New, monospace" font-weight="900" font-size="28" fill="#111111" text-anchor="middle" letter-spacing="12">OUT OF STEP // D.C. HARDCORE</text>
+  </g>
+
+  <!-- Center Artwork: Iconic Black Sheep & Stencil -->
+  <g transform="translate(400, 480)">
+    <circle cx="0" cy="0" r="140" fill="#111111"/>
+    <!-- Sheep silhouette in negative space -->
+    <path d="M -50 -40 C -70 -70 -20 -90 10 -70 C 40 -90 90 -60 70 -30 C 100 0 80 50 50 60 L 50 90 L 30 90 L 30 65 L -10 65 L -10 90 L -30 90 L -30 60 C -60 60 -80 10 -50 -40 Z" fill="#f4efe6"/>
+    <!-- Stylized Horns & Ear -->
+    <circle cx="-25" cy="-45" r="14" fill="#111111"/>
+    <circle cx="35" cy="-45" r="14" fill="#111111"/>
+    <!-- Inverted Cross / Straight Edge X -->
+    <text x="0" y="30" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="64" fill="#111111" text-anchor="middle">X</text>
+  </g>
+
+  <!-- Support Acts -->
+  <g transform="translate(400, 710)">
+    <text x="0" y="0" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="52" fill="#111111" text-anchor="middle" letter-spacing="3">W/ FAITH • VOID</text>
+    <text x="0" y="55" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="44" fill="#111111" text-anchor="middle" letter-spacing="2">IRON CROSS • TEEN IDLES</text>
+  </g>
+
+  <!-- Show Date & Venue -->
+  <rect x="50" y="810" width="700" height="150" fill="#111111"/>
+  <text x="400" y="865" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="48" fill="#f4efe6" text-anchor="middle" letter-spacing="4">FRIDAY NIGHT // 8:00 PM SHARP</text>
+  <text x="400" y="915" font-family="Courier New, monospace" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle" letter-spacing="3">BUFF HALL - 1500 BELMONT ST NW, DC</text>
+  <text x="400" y="945" font-family="Courier New, monospace" font-weight="900" font-size="22" fill="#dc2626" text-anchor="middle" letter-spacing="2">ALL AGES • $4 DAMAGE • NO BOOZE • NO VIOLENCE</text>
+
+  <!-- Bottom Stamp -->
+  <text x="400" y="1030" font-family="Courier New, monospace" font-weight="900" font-size="18" fill="#111111" text-anchor="middle" letter-spacing="6">YOU'RE NOT THE FIRST, I HOPE YOU'RE NOT THE LAST</text>
+</svg>

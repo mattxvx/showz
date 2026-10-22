@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="800" height="1100">
+  <rect width="800" height="1100" fill="#f1ece1"/>
+
+  <!-- Distress Frame -->
+  <rect x="25" y="25" width="750" height="1050" fill="none" stroke="#111111" stroke-width="12"/>
+  <line x1="25" y1="130" x2="775" y2="130" stroke="#111111" stroke-width="6"/>
+
+  <!-- Venue Heading -->
+  <text x="400" y="95" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="54" fill="#111111" text-anchor="middle" letter-spacing="8">CBGB &amp; OMFUG</text>
+  <text x="400" y="120" font-family="Courier New, monospace" font-weight="900" font-size="20" fill="#111111" text-anchor="middle" letter-spacing="4">315 BOWERY AT BLEECKER ST, NYC</text>
+
+  <!-- Huge Band Name -->
+  <g transform="translate(400, 270)">
+    <rect x="-350" y="-85" width="700" height="135" fill="#111111"/>
+    <text x="0" y="15" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="110" fill="#ffffff" text-anchor="middle" letter-spacing="10">BAD BRAINS</text>
+    <text x="0" y="80" font-family="Courier New, monospace" font-weight="900" font-size="30" fill="#dc2626" text-anchor="middle" letter-spacing="8">P.M.A. HARDCORE MATINEE</text>
+  </g>
+
+  <!-- Center Artwork: Lightning Bolt Striking Capitol -->
+  <g transform="translate(400, 520)">
+    <!-- Capitol Dome Silhouette -->
+    <path d="M -120 110 L 120 110 L 120 60 L 90 60 C 90 0 0 -20 0 -60 C 0 -20 -90 0 -90 60 L -120 60 Z" fill="#111111"/>
+    <rect x="-160" y="110" width="320" height="40" fill="#111111"/>
+    
+    <!-- Yellow/Red Lightning Bolt -->
+    <polygon points="10,-170 -60,-20 0,-20 -50,130 90,-40 30,-40 70,-170" fill="#dc2626" stroke="#111111" stroke-width="6"/>
+  </g>
+
+  <!-- Lineup Support -->
+  <g transform="translate(400, 750)">
+    <text x="0" y="0" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="48" fill="#111111" text-anchor="middle" letter-spacing="4">SPECIAL GUESTS:</text>
+    <text x="0" y="60" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="62" fill="#111111" text-anchor="middle" letter-spacing="6">BEASTIE BOYS</text>
+    <text x="0" y="115" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="44" fill="#111111" text-anchor="middle" letter-spacing="4">REAGAN YOUTH • KRAUT</text>
+  </g>
+
+  <!-- Bottom Details -->
+  <rect x="35" y="910" width="730" height="130" fill="#111111"/>
+  <text x="400" y="965" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="46" fill="#ffffff" text-anchor="middle" letter-spacing="6">SUNDAY OCT 24 // 2:00 PM</text>
+  <text x="400" y="1015" font-family="Courier New, monospace" font-weight="900" font-size="24" fill="#e5e5e5" text-anchor="middle" letter-spacing="4">DAMAGE $5.00 • ALL AGES WELCOME</text>
+</svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="800" height="1100">
+  <rect width="800" height="1100" fill="#f8f4ed"/>
+
+  <!-- Bold Stark Frame -->
+  <rect x="30" y="30" width="740" height="1040" fill="none" stroke="#000000" stroke-width="14"/>
+
+  <!-- Four Black Bars (Iconic Raymond Pettibon Logo) -->
+  <g transform="translate(180, 80)">
+    <rect x="0" y="0" width="60" height="160" fill="#000000"/>
+    <rect x="120" y="0" width="60" height="160" fill="#000000"/>
+    <rect x="240" y="0" width="60" height="160" fill="#000000"/>
+    <rect x="360" y="0" width="60" height="160" fill="#000000"/>
+  </g>
+
+  <!-- Band Name -->
+  <text x="400" y="330" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="124" fill="#000000" text-anchor="middle" letter-spacing="12">BLACK FLAG</text>
+  <line x1="50" y1="360" x2="750" y2="360" stroke="#000000" stroke-width="8"/>
+
+  <!-- Pettibon Style Stark Text -->
+  <text x="400" y="420" font-family="Courier New, monospace" font-weight="900" font-size="34" fill="#dc2626" text-anchor="middle" letter-spacing="6">DAMAGED // 1982 ASSAULT</text>
+
+  <!-- Stark Illustration Box -->
+  <rect x="120" y="450" width="560" height="280" fill="#000000"/>
+  <text x="400" y="550" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="64" fill="#ffffff" text-anchor="middle" letter-spacing="4">NO POLICE</text>
+  <text x="400" y="620" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" letter-spacing="4">NO BARRICADES</text>
+  <text x="400" y="680" font-family="Courier New, monospace" font-weight="900" font-size="24" fill="#dc2626" text-anchor="middle" letter-spacing="4">TOTAL SOUND SYSTEM TERROR</text>
+
+  <!-- Lineup -->
+  <g transform="translate(400, 790)">
+    <text x="0" y="0" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="52" fill="#000000" text-anchor="middle" letter-spacing="6">W/ MEAT PUPPETS</text>
+    <text x="0" y="55" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="46" fill="#000000" text-anchor="middle" letter-spacing="4">MINUTEMEN • DESCENDENTS</text>
+  </g>
+
+  <!-- Venue / Date -->
+  <rect x="40" y="880" width="720" height="160" fill="#000000"/>
+  <text x="400" y="940" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" letter-spacing="4">SATURDAY NIGHT // DOORS 7:30</text>
+  <text x="400" y="990" font-family="Courier New, monospace" font-weight="900" font-size="28" fill="#f8f4ed" text-anchor="middle" letter-spacing="3">OLYMPIC AUDITORIUM, LOS ANGELES</text>
+  <text x="400" y="1025" font-family="Courier New, monospace" font-weight="900" font-size="20" fill="#dc2626" text-anchor="middle" letter-spacing="4">ADMISSION $6.50 • ALL AGES</text>
+</svg>

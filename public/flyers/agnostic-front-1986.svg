@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="800" height="1100">
+  <rect width="800" height="1100" fill="#f0ebe0"/>
+
+  <!-- Heavy Outer Border -->
+  <rect x="25" y="25" width="750" height="1050" fill="none" stroke="#000000" stroke-width="12"/>
+
+  <!-- NYHC Top Banner -->
+  <rect x="35" y="45" width="730" height="75" fill="#000000"/>
+  <text x="400" y="98" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="46" fill="#ffffff" text-anchor="middle" letter-spacing="12">NEW YORK HARDCORE</text>
+
+  <!-- Headliner -->
+  <g transform="translate(400, 240)">
+    <text x="0" y="0" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="94" fill="#000000" text-anchor="middle" letter-spacing="6">AGNOSTIC FRONT</text>
+    <line x1="-340" y1="20" x2="340" y2="20" stroke="#000000" stroke-width="10"/>
+    <text x="0" y="65" font-family="Courier New, monospace" font-weight="900" font-size="30" fill="#dc2626" text-anchor="middle" letter-spacing="8">VICTIM IN PAIN // NYC MATINEE</text>
+  </g>
+
+  <!-- Combat Boots & Skull graphic -->
+  <g transform="translate(400, 480)">
+    <rect x="-240" y="-120" width="480" height="240" fill="#000000"/>
+    <!-- Crossbones & Combat Boots stencil -->
+    <line x1="-180" y1="-90" x2="180" y2="90" stroke="#f0ebe0" stroke-width="24" stroke-linecap="round"/>
+    <line x1="180" y1="-90" x2="-180" y2="90" stroke="#f0ebe0" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="80" fill="#dc2626"/>
+    <text x="0" y="25" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="70" fill="#ffffff" text-anchor="middle">NYHC</text>
+  </g>
+
+  <!-- Supports -->
+  <g transform="translate(400, 720)">
+    <text x="0" y="0" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="56" fill="#000000" text-anchor="middle" letter-spacing="4">W/ WARZONE</text>
+    <text x="0" y="60" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="48" fill="#000000" text-anchor="middle" letter-spacing="4">MURPHY'S LAW • SHEER TERROR</text>
+  </g>
+
+  <!-- Venue / Schedule -->
+  <rect x="40" y="840" width="720" height="190" fill="#000000"/>
+  <text x="400" y="905" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" letter-spacing="6">SUNDAY MATINEE // 2:00 PM</text>
+  <text x="400" y="960" font-family="Courier New, monospace" font-weight="900" font-size="32" fill="#f0ebe0" text-anchor="middle" letter-spacing="4">CBGB - 315 BOWERY, NYC</text>
+  <text x="400" y="1005" font-family="Courier New, monospace" font-weight="900" font-size="22" fill="#dc2626" text-anchor="middle" letter-spacing="4">STAGE DIVES STRICTLY ENCOURAGED • $5 DOOR</text>
+</svg>

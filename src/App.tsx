@@ -17,6 +17,7 @@ import {
 import { isSessionValid, clearAdminSession } from './utils/auth';
 import { Navbar } from './components/Navbar';
 import { FilterBar } from './components/FilterBar';
+import { MiniCalendar } from './components/MiniCalendar';
 import { ShowCard } from './components/ShowCard';
 import { ShowDetailModal } from './components/ShowDetailModal';
 import { AdminShowModal } from './components/AdminShowModal';
@@ -47,6 +48,8 @@ export function App() {
   // Filters & Display
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState<ViewFilter>('all');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<EventGenre | 'All'>('All');
   const [sortBy, setSortBy] = useState<SortOption>('date-asc');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -247,22 +250,29 @@ export function App() {
         return false;
       }
 
-      // Date filter
-      const [year, month, day] = show.date.split('-').map(Number);
-      const showDate = new Date(year, month - 1, day);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Specific Calendar Date Filter (overrides generic date filters when picked)
+      if (selectedCalendarDate) {
+        if (show.date !== selectedCalendarDate) {
+          return false;
+        }
+      } else {
+        // Date filter
+        const [year, month, day] = show.date.split('-').map(Number);
+        const showDate = new Date(year, month - 1, day);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-      const diffDays = Math.round((showDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round((showDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-      if (dateFilter === 'tonight' && diffDays !== 0) {
-        return false;
-      } else if (dateFilter === 'weekend') {
-        const dayOfWeek = showDate.getDay();
-        const isUpcomingWeekend = diffDays >= 0 && diffDays <= 7 && (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0);
-        if (!isUpcomingWeekend) return false;
-      } else if (dateFilter === 'upcoming') {
-        if (diffDays < 0) return false;
+        if (dateFilter === 'tonight' && diffDays !== 0) {
+          return false;
+        } else if (dateFilter === 'weekend') {
+          const dayOfWeek = showDate.getDay();
+          const isUpcomingWeekend = diffDays >= 0 && diffDays <= 7 && (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0);
+          if (!isUpcomingWeekend) return false;
+        } else if (dateFilter === 'upcoming') {
+          if (diffDays < 0) return false;
+        }
       }
 
       // Search Query filter
@@ -454,7 +464,10 @@ export function App() {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               dateFilter={dateFilter}
-              onDateFilterChange={setDateFilter}
+              onDateFilterChange={(df) => {
+                setSelectedCalendarDate(null);
+                setDateFilter(df);
+              }}
               selectedGenre={selectedGenre}
               onGenreChange={setSelectedGenre}
               sortBy={sortBy}
@@ -462,7 +475,39 @@ export function App() {
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               tonightCount={tonightCount}
+              isCalendarOpen={isCalendarOpen}
+              onToggleCalendar={() => setIsCalendarOpen((prev) => !prev)}
+              hasActiveCalendarDate={Boolean(selectedCalendarDate)}
             />
+
+            {/* Expandable Mini Calendar with Red Dot Indicators */}
+            {isCalendarOpen && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                <MiniCalendar
+                  shows={shows}
+                  selectedDate={selectedCalendarDate}
+                  onSelectDate={(d) => {
+                    setSelectedCalendarDate(d);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Active Calendar Date Pill */}
+            {selectedCalendarDate && (
+              <div className="flex items-center justify-between p-3 rounded-xl bg-red-950/80 border border-red-800 text-xs font-bold text-red-200 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  <span>FILTERING GIGS FOR DATE: <strong className="text-white">{selectedCalendarDate}</strong></span>
+                </div>
+                <button
+                  onClick={() => setSelectedCalendarDate(null)}
+                  className="px-2 py-1 rounded-lg bg-black hover:bg-neutral-900 text-red-400 hover:text-white text-[10px] font-black uppercase border border-red-900 transition-colors cursor-pointer"
+                >
+                  RESET DATE
+                </button>
+              </div>
+            )}
 
             {/* Shows Header Count */}
             <div className="flex items-center justify-between pt-2">
